@@ -36,17 +36,19 @@ jobs:
       - name: Restore original pubspec
         run: mv pubspec.yaml.bak pubspec.yaml
 
-      - name: Force compileSdk and targetSdk to 36 across all Gradle files
+      - name: Force Android compileSdk and targetSdk to 36
         run: |
-          find android/ -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/compileSdkVersion.*/compileSdkVersion 36/g' {} +
-          find android/ -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/compileSdk =.*/compileSdk = 36/g' {} +
-          find android/ -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/compileSdk [0-9]*/compileSdk 36/g' {} +
-          find android/ -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/targetSdkVersion.*/targetSdkVersion 36/g' {} +
-          find android/ -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/targetSdk =.*/targetSdk = 36/g' {} +
+          # Groovy (.gradle) fayllari uchun
+          find android/ -type f -name "*.gradle" -exec sed -i 's/compileSdkVersion.*/compileSdkVersion 36/g' {} +
+          find android/ -type f -name "*.gradle" -exec sed -i 's/targetSdkVersion.*/targetSdkVersion 36/g' {} +
 
-      - name: Upgrade dependencies
+          # Kotlin Script (.kts) fayllari uchun
+          find android/ -type f -name "*.gradle.kts" -exec sed -i 's/compileSdk =.*/compileSdk = 36/g' {} +
+          find android/ -type f -name "*.gradle.kts" -exec sed -i 's/targetSdk =.*/targetSdk = 36/g' {} +
+
+      - name: Update pubspec.yaml to allow file_picker update
         run: |
-          flutter pub upgrade file_picker
+          sed -i 's/file_picker:.*/file_picker: ^12.0.0/' pubspec.yaml || true
           flutter pub get
 
       - name: Generate app launcher icon
